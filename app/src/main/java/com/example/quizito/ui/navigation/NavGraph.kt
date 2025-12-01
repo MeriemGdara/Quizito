@@ -16,7 +16,7 @@ fun NavGraph(
     authUseCases: AuthUseCases,
     saveScoreUseCase: SaveScoreUseCase,
     getUserScoresUseCase: GetUserScoresUseCase,
-    getThemeTitleUseCase: GetThemeTitleUseCase,   // ✅ manquait ici
+    getThemeTitleUseCase: GetThemeTitleUseCase,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
@@ -48,10 +48,32 @@ fun NavGraph(
         }
 
         composable("themes") {
-            ThemeScreen(onThemeClick = { themeId ->
-                navController.navigate("Quiz/$themeId")
-            })
+            ThemeScreen(
+                onThemeClick = { themeId ->
+                    navController.navigate("Quiz/$themeId")
+                },
+                onLogoutClick = {
+                    // Exemple : retour à l’écran login
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                },
+                onMyScoresClick = {
+                    navController.navigate("scores")
+                },
+                onAllScoresClick = {
+                    navController.navigate("allScores") // ✅ prévoir une route pour les meilleurs scores
+                }
+            )
         }
+        composable("allScores") {
+            AllScoresScreen(
+                getThemeTitleUseCase = getThemeTitleUseCase,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+
 
         composable("Quiz/{themeId}") { backStackEntry ->
             val themeId = backStackEntry.arguments?.getString("themeId") ?: return@composable
@@ -86,7 +108,7 @@ fun NavGraph(
         composable("scores") {
             ScoresScreen(
                 getUserScoresUseCase = getUserScoresUseCase,
-                getThemeTitleUseCase = getThemeTitleUseCase,   // ✅ injection
+                getThemeTitleUseCase = getThemeTitleUseCase,
                 onBackClick = { navController.popBackStack() }
             )
         }

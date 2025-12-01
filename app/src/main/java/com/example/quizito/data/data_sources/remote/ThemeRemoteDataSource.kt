@@ -13,10 +13,12 @@ class ThemeRemoteDataSource @Inject constructor(
         return snapshot.documents.mapNotNull { it.toObject(ThemeDto::class.java) }
     }
     suspend fun getThemeTitleById(themeId: String): String {
-        val snapshot = db.collection("Themes")
-            .document(themeId)
+        val snapshot = db.collection("themes")
+            .whereEqualTo("id", themeId)   // ✅ recherche par champ "id"
             .get()
             .await()
-        return snapshot.getString("title") ?: themeId
+
+        val doc = snapshot.documents.firstOrNull()
+        return doc?.getString("title") ?: themeId
     }
 }
